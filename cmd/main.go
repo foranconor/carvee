@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"os"
+	"strings"
 
 	"github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/font/opentype"
@@ -11,12 +12,19 @@ import (
 	"github.com/tdewolff/canvas/renderers"
 )
 
+const (
+	FEED      = 2.0
+	THICKNESS = 10.0
+	STEPOVER  = 0.02
+	SAFE_Z    = THICKNESS + 2
+)
+
 func main() {
 	text := "Ashleigh & Eamon"
 	// text := "Albert"
 
 	// file, err := os.OpenFile("fonts/MysteryQuest-Regular.ttf", os.O_RDONLY, 0644)
-	file, err := os.OpenFile("fonts/FleurDeLeah-Regular.ttf", os.O_RDONLY, 0644)
+	file, err := os.OpenFile("fonts/Creepster-Regular.ttf", os.O_RDONLY, 0644)
 
 	// file, err := os.OpenFile("fonts/MysteryQuest-Regular.ttf", os.O_RDONLY, 0644)
 	if err != nil {
@@ -46,6 +54,11 @@ func main() {
 	x := 0.0
 
 	union := &canvas.Path{}
+	file, err = os.Create("test.nc")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
 	for _, rune := range text {
 		gid, ok := face.NominalGlyph(rune)
 
@@ -82,23 +95,32 @@ func main() {
 			case opentype.SegmentOpQuadTo:
 				path.QuadTo(float64(contour.Args[0].X), float64(contour.Args[0].Y), float64(contour.Args[1].X), float64(contour.Args[1].Y))
 			case opentype.SegmentOpCubeTo:
-				fmt.Println("have a cubic")
 				path.CubeTo(float64(contour.Args[0].X), float64(contour.Args[0].Y), float64(contour.Args[1].X), float64(contour.Args[1].Y), float64(contour.Args[2].X), float64(contour.Args[2].Y))
 			}
 		}
 		path.Close()
 		path = path.Settle(canvas.EvenOdd)
+		path = path.SimplifyVisvalingamWhyatt(1)
 		path.Translate(x, 0)
+		ctx.SetStrokeColor(color.RGBA{R: 255, G: 0, B: 255, A: 255})
+
+		z := THICKNESS - 0.1
+		file.WriteString(pathToGcode(path, 0, 0, 0.1, z))
+
 		ctx.DrawPath(10, 10, path)
+		ctx.SetStrokeColor(color.RGBA{R: 0, G: 255, B: 255, A: 255})
 		// ctx.SetStrokeColor(color.RGBA{R: 255, G: 0, B: 0, A: 255})
 		// ctx.DrawPath(10, 10, path)
 		// ctx.SetStrokeColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+
 		x += float64(advance)
 		for range 20 {
-			path = path.Offset(-5, 0.1)
+			z -= STEPOVER
+			path = path.Offset(-5, STEPOVER)
 			path = path.Settle(canvas.EvenOdd)
 			path = path.SimplifyVisvalingamWhyatt(1)
 			ctx.DrawPath(10, 10, path)
+			file.WriteString(pathToGcode(path, 0, 0, 0.1, z))
 		}
 
 		union = union.Or(path)
@@ -132,4 +154,31 @@ func main() {
 		fmt.Println(err)
 	}
 
+}
+
+func pathToGcode(path *canvas.Path, offestX, offsetY, scale, z float64) string {
+	gcode := strings.Builder{}
+	subPaths := path.Split()
+	for _, subPath := range subPaths {
+		scanner := subPath.Scanner()
+		for scanner.Scan() {
+			vs := scanner.Values()
+			x := vs[0]
+			y := vs[1]
+			x = x*scale + offestX
+			y = y*scale + offsetY
+			g := 0.0
+			zz := SAFE_Z
+			if scanner.Cmd() == 2 {
+				g = 1.0
+				zz = z
+			}
+			gcode.WriteString(gcodeHelper(g, FEED, x, y, zz))
+		}
+	}
+	return gcode.String()
+}
+
+func gcodeHelper(g, f, x, y, z float64) string {
+	return fmt.Sprintf("G%.0f F%.0f X%.3f Y%.3f Z%.3f\n", g, f, x, y, z)
 }
