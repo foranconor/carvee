@@ -31,13 +31,83 @@ type Datum struct {
 }
 
 func main() {
+	xMargin := 40.0
+	// nameFont := "Zeyada-Regular.ttf"
+	// dateFont := "BaiJamjuree-Regular.ttf"
+	// data := []Datum{
+	// 	{
+	// 		Text:  "Ashleigh",
+	// 		Font:  nameFont,
+	// 		Ox:    xMargin,
+	// 		Oy:    700.0,
+	// 		Scale: 0.14,
+	// 	},
+	// 	{
+	// 		Text:  "& Eamon",
+	// 		Font:  nameFont,
+	// 		Ox:    25.0,
+	// 		Oy:    550.0,
+	// 		Scale: 0.14,
+	// 	},
+	// 	{
+	// 		Text: "26·10·2025",
+	//
+	// 		Font:  dateFont,
+	// 		Ox:    126.0,
+	// 		Oy:    200.0,
+	// 		Scale: 0.05,
+	// 	},
+	// }
+	// nameFont := "LiuJianMaoCao-Regular.ttf"
+	// dateFont := "Raleway-Regular.ttf"
+	// data := []Datum{
+	// 	{
+	// 		Text:  "Ashleigh",
+	// 		Font:  nameFont,
+	// 		Ox:    xMargin,
+	// 		Oy:    700.0,
+	// 		Scale: 0.14,
+	// 	},
+	// 	{
+	// 		Text:  "& Eamon",
+	// 		Font:  nameFont,
+	// 		Ox:    25.0,
+	// 		Oy:    550.0,
+	// 		Scale: 0.14,
+	// 	},
+	// 	{
+	// 		Text: "26·10·2025",
+	//
+	// 		Font:  dateFont,
+	// 		Ox:    126.0,
+	// 		Oy:    200.0,
+	// 		Scale: 0.05,
+	// 	},
+	// }
+	nameFont := "MysteryQuest-Regular.ttf"
+	dateFont := "Creepster-Regular.ttf"
 	data := []Datum{
 		{
-			Text:  "TestA",
-			Font:  "LiuJianMaoCao-Regular.ttf",
-			Ox:    20.0,
-			Oy:    500.0,
-			Scale: 0.1,
+			Text:  "Ashleigh",
+			Font:  nameFont,
+			Ox:    xMargin,
+			Oy:    700.0,
+			Scale: 0.12,
+		},
+		{
+			Text:  "& Eamon",
+			Font:  "Kablammo-Regular-VariableFont_MORF.ttf",
+			Ox:    25.0,
+			Oy:    550.0,
+			Scale: 0.054,
+		},
+		{
+			Text: "26·10·2025",
+
+			Font:  dateFont,
+			Ox:    126.0,
+			Oy:    200.0,
+			Scale: 0.05,
 		},
 	}
 	c := canvas.New(1, 1)
